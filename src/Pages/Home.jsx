@@ -208,6 +208,7 @@ export default function Home() {
 
                 <p style={{ marginTop: 10, opacity: 0.7, fontSize: 12 }}>
                   Tip: click outside or press ESC to close
+                  
                 </p>
               </div>
             </div>
