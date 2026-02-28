@@ -1,0 +1,48 @@
+.navbar {
+  background: #111;
+  padding: 15px 40px;
+  border-bottom: 1px solid #333;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+}
+
+.navbar-brand {
+  font-size: 22px;
+  font-weight: bold;
+  color: #4f7cff;
+}
+
+.nav-links {
+  display: flex;
+  gap: 25px;
+}
+
+.nav-auth {
+  display: flex;
+  gap: 15px;
+}
+
+.btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+}
+
+.btn-primary {
+  background: #4f7cff;
+  color: white;
+}
+
+.btn-secondary {
+  border: 1px solid #4f7cff;
+  color: #4f7cff;
+}
