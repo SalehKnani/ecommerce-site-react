@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { getProducts } from "../services/productsApi";
+import { CartContext } from "../context/CartContext";
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -9,10 +10,15 @@ export default function Home() {
   // ✅ modal state
   const [selectedProduct, setSelectedProduct] = useState(null);
 
+  // ✅ cart
+  const { addToCart } = useContext(CartContext);
+
+  // ✅ tiny feedback (optional)
+  const [addedMsg, setAddedMsg] = useState("");
+
   useEffect(() => {
     async function fetchData() {
       try {
-        // NOTE: your getProducts(offset, limit)
         const data = await getProducts(0, 180);
         setProducts(data);
       } catch (err) {
@@ -33,12 +39,43 @@ export default function Home() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  function handleAddToCart(product) {
+    addToCart({
+      id: product.id,
+      title: product.title,
+      price: product.price,
+      image: product.images?.[0],
+    });
+
+    setAddedMsg(`Added: ${product.title}`);
+    setTimeout(() => setAddedMsg(""), 1200);
+  }
+
   if (loading) return <h2>Loading...</h2>;
   if (error) return <h2 style={{ color: "red" }}>{error}</h2>;
 
   return (
     <div style={{ padding: "20px" }}>
       <h1>Products</h1>
+
+      {/* ✅ small toast */}
+      {addedMsg && (
+        <div
+          style={{
+            position: "fixed",
+            top: 18,
+            right: 18,
+            background: "#111",
+            color: "white",
+            border: "1px solid #333",
+            padding: "10px 12px",
+            borderRadius: 12,
+            zIndex: 99999,
+          }}
+        >
+          {addedMsg}
+        </div>
+      )}
 
       <div
         style={{
@@ -70,7 +107,6 @@ export default function Home() {
             <h3 style={{ marginTop: 10 }}>{product.title}</h3>
             <p style={{ fontWeight: "bold" }}>${product.price}</p>
 
-            {/* ✅ short description (optional) */}
             <p
               style={{
                 opacity: 0.85,
@@ -120,7 +156,6 @@ export default function Home() {
             zIndex: 9999,
           }}
         >
-          {/* stop close when clicking inside */}
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
@@ -146,7 +181,13 @@ export default function Home() {
               />
 
               <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 10,
+                  }}
+                >
                   <h2 style={{ margin: 0 }}>{selectedProduct.title}</h2>
 
                   <button
@@ -175,6 +216,7 @@ export default function Home() {
 
                 <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
                   <button
+                    onClick={() => handleAddToCart(selectedProduct)}
                     style={{
                       flex: 1,
                       padding: "10px 12px",
@@ -208,7 +250,6 @@ export default function Home() {
 
                 <p style={{ marginTop: 10, opacity: 0.7, fontSize: 12 }}>
                   Tip: click outside or press ESC to close
-                  test 7.43
                 </p>
               </div>
             </div>
