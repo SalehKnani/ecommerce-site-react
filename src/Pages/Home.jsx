@@ -1,17 +1,23 @@
-import { useEffect, useState, useContext } from "react";
+// import { useEffect, useState, useContext } from "react";
 import { getProducts } from "../services/productsApi";
 import { CartContext } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
+// import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
+import "./Home.css";
 
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const toastTimerRef = useRef(null);
+  const navigate = useNavigate();
 
   // ✅ modal state
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   // ✅ cart
-  const { addToCart } = useContext(CartContext);
+  const { addToCart, isLoggedIn } = useContext(CartContext);
 
   // ✅ tiny feedback (optional)
   const [addedMsg, setAddedMsg] = useState("");
@@ -39,17 +45,32 @@ export default function Home() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  function handleAddToCart(product) {
-    addToCart({
-      id: product.id,
-      title: product.title,
-      price: product.price,
-      image: product.images?.[0],
-    });
+  useEffect(() => {
+  if (!addedMsg) return;
 
-    setAddedMsg(`Added: ${product.title}`);
-    setTimeout(() => setAddedMsg(""), 1200);
-  }
+  // clear previous timer so it always stays full 5s
+  if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+
+  toastTimerRef.current = setTimeout(() => {
+    setAddedMsg("");
+  }, 5000);
+
+  return () => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+  };
+}, [addedMsg]);
+
+function handleAddToCart(product) {
+  const res = addToCart({
+    id: product.id,
+    title: product.title,
+    price: product.price,
+    image: product.images?.[0],
+  });
+
+  if (res?.ok) setAddedMsg(`Added: ${product.title}`);
+  else setAddedMsg("Please login first to add items to cart");
+}
 
   if (loading) return <h2>Loading...</h2>;
   if (error) return <h2 style={{ color: "red" }}>{error}</h2>;
@@ -59,23 +80,28 @@ export default function Home() {
       <h1>Products</h1>
 
       {/* ✅ small toast */}
+      
       {addedMsg && (
-        <div
-          style={{
-            position: "fixed",
-            top: 18,
-            right: 18,
-            background: "#111",
-            color: "white",
-            border: "1px solid #333",
-            padding: "10px 12px",
-            borderRadius: 12,
-            zIndex: 99999,
-          }}
+  <div className={`toast ${addedMsg.startsWith("Added") ? "toast-ok" : "toast-warn"}`}>
+    {addedMsg.startsWith("Added") ? (
+      addedMsg
+    ) : (
+      <>
+        Please{" "}
+        <span
+          className="toast-link"
+          onClick={() => navigate("/auth")}
+          role="link"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && navigate("/auth")}
         >
-          {addedMsg}
-        </div>
-      )}
+          login
+        </span>{" "}
+        first to add items to cart
+      </>
+    )}
+  </div>
+)}
 
       <div
         style={{
@@ -249,7 +275,7 @@ export default function Home() {
                 </div>
 
                 <p style={{ marginTop: 10, opacity: 0.7, fontSize: 12 }}>
-                  Tip: click outside or press ESC to close
+                  {/* Tip: click outside or press ESC to close */}
                 </p>
               </div>
             </div>

@@ -52,6 +52,8 @@ export default function AuthProvider({ children }) {
   function logout() {
     setUser(null);
     localStorage.removeItem("user");
+    localStorage.removeItem("cart");
+
   }
 
   const value = useMemo(

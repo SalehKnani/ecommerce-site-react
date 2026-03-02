@@ -1,4 +1,5 @@
-import { createContext, useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
+import { AuthContext } from "./AuthContext";
 
 export const CartContext = createContext(null);
 
@@ -12,6 +13,7 @@ function loadCart() {
 
 export default function CartProvider({ children }) {
   const [cart, setCart] = useState(() => loadCart());
+  const { isLoggedIn } = useContext(AuthContext);
 
   function persist(next) {
     setCart(next);
@@ -20,6 +22,11 @@ export default function CartProvider({ children }) {
 
   // item: { id, title, price, image }
   function addToCart(item) {
+    // ✅ block if not logged in
+    if (!isLoggedIn) {
+      return { ok: false, reason: "AUTH" };
+    }
+
     persist(
       (() => {
         const exists = cart.find((x) => x.id === item.id);
@@ -31,6 +38,8 @@ export default function CartProvider({ children }) {
         return [...cart, { ...item, qty: 1 }];
       })()
     );
+
+    return { ok: true };
   }
 
   function removeFromCart(id) {
@@ -51,8 +60,6 @@ export default function CartProvider({ children }) {
 
   function clearCart() {
     persist([]);
-    // optional hard delete key:
-    // localStorage.removeItem("cart");
   }
 
   const totalItems = useMemo(
@@ -76,6 +83,7 @@ export default function CartProvider({ children }) {
         clearCart,
         totalItems,
         totalPrice,
+        isLoggedIn, // ✅ useful for disabling buttons
       }}
     >
       {children}

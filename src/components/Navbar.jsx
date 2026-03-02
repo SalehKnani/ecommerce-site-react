@@ -17,9 +17,9 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to="/" className="navbar-brand">
+        {/* <Link to="/" className="navbar-brand"> */}
           ShopHub
-        </Link>
+        {/* </Link> */}
 
         <div className="nav-links">
           <Link to="/">Home</Link>
